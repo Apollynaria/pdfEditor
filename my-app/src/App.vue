@@ -32,8 +32,9 @@
 
 <script>
 import PSPDFKitContainer from "@/components/PSPDFKitContainer";
+import http from "./http-common";
 
-export default {
+export default{
   el: '#app',
   data() {
     return {
@@ -277,24 +278,24 @@ export default {
     getJson: async function (event) {
       if (event) {
 
-        const options = {
-          // рекомендуемое название файла
-          suggestedName: 'test4.json',
-          types: [
-            {
-              description: 'Text',
-              accept: {
-                'text/plain': '.json'
-              }
-            }
-          ],
-          excludeAcceptAllOption: true
-        }
+        // const options = {
+        //   // рекомендуемое название файла
+        //   suggestedName: 'test4.json',
+        //   types: [
+        //     {
+        //       description: 'Text',
+        //       accept: {
+        //         'text/plain': '.json'
+        //       }
+        //     }
+        //   ],
+        //   excludeAcceptAllOption: true
+        // }
 
         this.toWrite = '{\n\t"pages": [\n';
 
-        const fileHandle = await window.showSaveFilePicker(options)
-        const writableStream = await fileHandle.createWritable()
+        // const fileHandle = await window.showSaveFilePicker(options)
+        // const writableStream = await fileHandle.createWritable()
 
         for (let i = 0; i < this.pages.length; i++) {
 
@@ -342,8 +343,30 @@ export default {
         }
         this.toWrite += '\t]\n'; //endArray
         this.toWrite += '}'; //endJson
-        await writableStream.write(this.toWrite)
-        await writableStream.close()
+
+        const formData = new FormData();
+        formData.append('file', this.toWrite);
+
+        http.post('/saveFile', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+          .then(response => {
+            console.log(response.data);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+
+        // await writableStream.write(this.toWrite)
+        // await writableStream.close()
+        // var fso, tf;
+        // fso = new ActiveXObject("Scripting.FileSystemObject");
+        // tf = fso.CreateTextFile("c:\\testfile.json", true);
+        // Вставка строки с переносом на новую.
+        // tf.WriteLine(this.toWrite) ;
+        // tf.Close();
       }
     },
 
